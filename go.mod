@@ -1,4 +1,4 @@
-module github.com/vefier/vefier-cli
+module github.com/wodorfells/vefier-cli
 
 go 1.21
 
