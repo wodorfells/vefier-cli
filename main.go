@@ -5,8 +5,8 @@ import (
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"vefier-cli/internal/config"
-	"vefier-cli/internal/ui"
+	"github.com/wodorfells/vefier-cli/internal/config"
+	"github.com/wodorfells/vefier-cli/internal/ui"
 )
 
 func main() {
