@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/vefier/vefier-cli/internal/providers"
-	"github.com/vefier/vefier-cli/internal/ui/styles"
+	"github.com/wodorfells/vefier-cli/internal/providers"
+	"github.com/wodorfells/vefier-cli/internal/ui/styles"
 )
 
 type ProvidersView struct {

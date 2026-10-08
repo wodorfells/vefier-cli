@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 	
-	"github.com/vefier/vefier-cli/internal/keys"
-	"github.com/vefier/vefier-cli/internal/providers"
+	"github.com/wodorfells/vefier-cli/internal/keys"
+	"github.com/wodorfells/vefier-cli/internal/providers"
 )
 
 func CheckKey(ctx context.Context, p providers.Provider, k keys.Key) string {

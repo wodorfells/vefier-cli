@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/vefier/vefier-cli/internal/providers"
+	"github.com/wodorfells/vefier-cli/internal/providers"
 )
 
 type StreamChunk struct {

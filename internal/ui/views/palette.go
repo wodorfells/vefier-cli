@@ -3,7 +3,7 @@ package views
 import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/vefier/vefier-cli/internal/ui/styles"
+	"github.com/wodorfells/vefier-cli/internal/ui/styles"
 )
 
 type Item struct {

@@ -2,10 +2,10 @@ package ui
 
 import (
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/vefier/vefier-cli/internal/config"
-	"github.com/vefier/vefier-cli/internal/keys"
-	"github.com/vefier/vefier-cli/internal/ui/styles"
-	"github.com/vefier/vefier-cli/internal/ui/views"
+	"github.com/wodorfells/vefier-cli/internal/config"
+	"github.com/wodorfells/vefier-cli/internal/keys"
+	"github.com/wodorfells/vefier-cli/internal/ui/styles"
+	"github.com/wodorfells/vefier-cli/internal/ui/views"
 )
 
 type App struct {

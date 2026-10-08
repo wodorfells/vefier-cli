@@ -7,10 +7,10 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/vefier/vefier-cli/internal/api"
-	"github.com/vefier/vefier-cli/internal/keys"
-	"github.com/vefier/vefier-cli/internal/providers"
-	"github.com/vefier/vefier-cli/internal/ui/styles"
+	"github.com/wodorfells/vefier-cli/internal/api"
+	"github.com/wodorfells/vefier-cli/internal/keys"
+	"github.com/wodorfells/vefier-cli/internal/providers"
+	"github.com/wodorfells/vefier-cli/internal/ui/styles"
 )
 
 type CheckResultMsg struct {
