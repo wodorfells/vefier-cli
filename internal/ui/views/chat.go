@@ -110,7 +110,7 @@ func (v *ChatView) Update(msg tea.Msg) (*ChatView, tea.Cmd) {
 			// Сохраняем в историю сессии
 			v.sessionStore.AddMessage(v.session.ID, "user", text, len(text)/4, 0)
 			
-			v.messages = append(v.messages, styles.ThemeCrushAcc.Render("Вы: ")+text)
+			v.messages = append(v.messages, lipgloss.NewStyle().Foreground(styles.ThemeCrushAcc).Render("Вы: ")+text)
 			v.messages = append(v.messages, styles.ListSelected.Render(v.provider.Name+": "))
 			v.viewport.SetContent(strings.Join(v.messages, "\n\n"))
 			v.viewport.GotoBottom()
