@@ -27,17 +27,17 @@ def get_release_url():
     return f"https://github.com/{REPO}/releases/download/v{VERSION}/vefier_{os_name}_{arch_name}.{ext}", ext
 
 def download_and_extract(url, ext, bin_dir, exe_name):
-    print(f"📥 Загрузка VeFier v{VERSION} из GitHub Releases...")
+    print(f"[INFO] Загрузка VeFier v{VERSION} из GitHub Releases...")
     archive_path = os.path.join(bin_dir, f"download.{ext}")
     
     try:
         urllib.request.urlretrieve(url, archive_path)
     except Exception as e:
-        print(f"❌ Ошибка загрузки ({url}): {e}")
-        print("Убедитесь, что релиз существует.")
+        print(f"[ERROR] Ошибка загрузки ({url}): {e}")
+        print("Убедитесь, что релиз существует на GitHub.")
         sys.exit(1)
         
-    print("📦 Распаковка...")
+    print("[INFO] Распаковка...")
     if ext == "zip":
         with zipfile.ZipFile(archive_path, 'r') as zf:
             zf.extractall(bin_dir)

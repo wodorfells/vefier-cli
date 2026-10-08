@@ -1,0 +1,8 @@
+setup.py
+vefier/__init__.py
+vefier/wrapper.py
+vefier_cli.egg-info/PKG-INFO
+vefier_cli.egg-info/SOURCES.txt
+vefier_cli.egg-info/dependency_links.txt
+vefier_cli.egg-info/entry_points.txt
+vefier_cli.egg-info/top_level.txt

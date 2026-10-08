@@ -1,0 +1,10 @@
+Metadata-Version: 2.4
+Name: vefier-cli
+Version: 1.0.0
+Summary: Универсальный AI-агент для терминала (TUI)
+Author: VeFier Studio
+Dynamic: author
+Dynamic: description
+Dynamic: summary
+
+Обертка для загрузки скомпилированного Go-бинарника VeFier CLI.

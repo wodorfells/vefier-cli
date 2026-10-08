@@ -5,7 +5,7 @@ const os = require('os');
 const { execSync } = require('child_process');
 
 const VERSION = '1.0.0';
-const REPO = 'vefier/vefier-cli';
+const REPO = 'wodorfells/vefier-cli';
 
 function getReleaseUrl() {
     let platform = os.platform();

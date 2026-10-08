@@ -2,7 +2,7 @@
 set -e
 
 # Very basic VeFier installation script
-REPO="vefier/vefier-cli"
+REPO="wodorfells/vefier-cli"
 BIN_DIR="/usr/local/bin"
 
 echo "Downloading VeFier..."
@@ -16,7 +16,7 @@ case $ARCH in
 esac
 
 # Replace with actual release fetcher in production
-URL="https://github.com/vefier/vefier-cli/releases/latest/download/vefier_${OS}_${ARCH}.tar.gz"
+URL="https://github.com/wodorfells/vefier-cli/releases/latest/download/vefier_${OS}_${ARCH}.tar.gz"
 
 curl -sL $URL | tar -xz -C /tmp
 sudo mv /tmp/vefier $BIN_DIR/vefier

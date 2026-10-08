@@ -1,5 +1,5 @@
 {
-  "name": "vefier-cli",
+  "name": "@wodorfells/vefier-cli",
   "version": "1.0.0",
   "description": "Универсальный AI-агент для терминала (TUI)",
   "bin": {
@@ -10,5 +10,5 @@
   },
   "author": "VeFier Studio",
   "license": "MIT",
-  "repository": "vefier/vefier-cli"
+  "repository": "wodorfells/vefier-cli"
 }
