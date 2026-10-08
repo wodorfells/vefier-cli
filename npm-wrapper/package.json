@@ -1,0 +1,14 @@
+{
+  "name": "vefier-cli",
+  "version": "1.0.0",
+  "description": "Универсальный AI-агент для терминала (TUI)",
+  "bin": {
+    "vefier": "bin/vefier"
+  },
+  "scripts": {
+    "postinstall": "node scripts/install.js"
+  },
+  "author": "VeFier Studio",
+  "license": "MIT",
+  "repository": "vefier/vefier-cli"
+}

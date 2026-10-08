@@ -1,0 +1,18 @@
+#!/usr/bin/env node
+
+// Файл-заглушка для NPM
+// Вызывается во время запуска "vefier" из командной строки.
+// Он передаст аргументы в реальный скачанный бинарник.
+const { spawnSync } = require('child_process');
+const path = require('path');
+const os = require('os');
+
+const exe = os.platform() === 'win32' ? 'vefier.exe' : 'vefier';
+const binPath = path.join(os.homedir(), '.vefier', 'bin', exe);
+
+const result = spawnSync(binPath, process.argv.slice(2), { stdio: 'inherit' });
+if (result.error) {
+    console.error(`Ошибка запуска: ${result.error.message}`);
+    process.exit(1);
+}
+process.exit(result.status);
