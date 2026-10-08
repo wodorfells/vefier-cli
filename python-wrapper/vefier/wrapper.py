@@ -8,7 +8,7 @@ import tarfile
 import shutil
 
 VERSION = "1.0.0"
-REPO = "vefier/vefier-cli"
+REPO = "wodorfells/vefier-cli"
 
 def get_release_url():
     sys_name = platform.system().lower()

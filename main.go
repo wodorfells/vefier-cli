@@ -10,14 +10,13 @@ import (
 )
 
 func main() {
-	cfg := config.LoadConfig()
-
+	cfg := config.Load()
+	
 	app := ui.NewApp(cfg)
 	p := tea.NewProgram(app, tea.WithAltScreen())
-
+	
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Ошибка запуска VeFier: %v\n", err)
 		os.Exit(1)
 	}
 }
-

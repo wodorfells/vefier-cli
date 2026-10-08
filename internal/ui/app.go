@@ -1,172 +1,217 @@
 package ui
 
 import (
+	"context"
+	"fmt"
+	"strings"
+
+	"github.com/charmbracelet/bubbles/textarea"
+	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/glamour"
+	"github.com/charmbracelet/lipgloss"
+
+	"github.com/wodorfells/vefier-cli/internal/api"
 	"github.com/wodorfells/vefier-cli/internal/config"
-	"github.com/wodorfells/vefier-cli/internal/keys"
-	"github.com/wodorfells/vefier-cli/internal/ui/styles"
-	"github.com/wodorfells/vefier-cli/internal/ui/views"
 )
 
-type App struct {
-	cfg           *config.Config
-	keyStore      *keys.Store
-	
-	state         string // "providers", "chat", "checker", "palette", "compare"
-	previousState string
-	providersView *views.ProvidersView
-	chatView      *views.ChatView
-	checkerView   *views.CheckerView
-	paletteView   *views.PaletteView
-	compareView   *views.CompareView
+type StreamChunkMsg struct {
+	Chunk api.StreamChunk
+	ch    <-chan api.StreamChunk
 }
 
-func NewApp(cfg *config.Config) *App {
-	ks := keys.NewStore()
-	return &App{
-		cfg:           cfg,
-		keyStore:      ks,
-		state:         "providers",
-		providersView: views.NewProvidersView(),
-		checkerView:   views.NewCheckerView(ks),
-		paletteView:   views.NewPaletteView(),
-		compareView:   views.NewCompareView(),
+type App struct {
+	cfg      *config.Config
+	styles   map[string]lipgloss.Style
+	renderer *glamour.TermRenderer
+
+	textarea textarea.Model
+	viewport viewport.Model
+
+	history []api.Message
+	current []string
+	
+	isStreaming bool
+	cancel      context.CancelFunc
+}
+
+func NewApp(c *config.Config) *App {
+	ta := textarea.New()
+	ta.Placeholder = "Сообщение..."
+	ta.Focus()
+	ta.Prompt = "┃ "
+	ta.CharLimit = 20000
+	ta.SetHeight(3)
+	ta.ShowLineNumbers = false
+
+	vp := viewport.New(100, 20) 
+
+	r, _ := glamour.NewTermRenderer(
+		glamour.WithAutoStyle(),
+		glamour.WithWordWrap(100),
+	)
+
+	app := &App{
+		cfg:      c,
+		styles:   GenerateStyles(c.Theme),
+		renderer: r,
+		textarea: ta,
+		viewport: vp,
+		history:  []api.Message{{Role: "system", Content: "Вы — полезный AI-ассистент."}},
 	}
+	app.refreshViewport()
+	return app
 }
 
 func (a *App) Init() tea.Cmd {
-	return a.providersView.Init()
+	return textarea.Blink
+}
+
+func listenStream(ch <-chan api.StreamChunk) tea.Cmd {
+	return func() tea.Msg {
+		chunk, ok := <-ch
+		if !ok {
+			return StreamChunkMsg{Chunk: api.StreamChunk{Done: true}, ch: ch}
+		}
+		return StreamChunkMsg{Chunk: chunk, ch: ch}
+	}
+}
+
+func (a *App) refreshViewport() {
+	var b strings.Builder
+	provider := a.cfg.GetActive()
+
+	if len(a.history) == 1 {
+		welcome := "Привет! Я готов к работе."
+		if a.cfg.Language == "en" {
+			welcome = "Hello! I am ready to help."
+		}
+		b.WriteString(a.styles["ai"].Render(provider.Name + ":"))
+		b.WriteString("\n" + a.styles["text"].Render(welcome) + "\n\n")
+	}
+
+	for _, m := range a.history {
+		if m.Role == "system" {
+			continue
+		}
+		if m.Role == "user" {
+			b.WriteString(a.styles["user"].Render("User"))
+			b.WriteString("\n" + a.styles["text"].Render(m.Content) + "\n\n")
+		} else {
+			b.WriteString(a.styles["ai"].Render(provider.Name))
+			md, _ := a.renderer.Render(m.Content)
+			b.WriteString("\n" + md + "\n")
+		}
+	}
+
+	if a.isStreaming && len(a.current) > 0 {
+		b.WriteString(a.styles["ai"].Render(provider.Name))
+		md, _ := a.renderer.Render(strings.Join(a.current, ""))
+		b.WriteString("\n" + md + "\n")
+	}
+
+	a.viewport.SetContent(b.String())
+	a.viewport.GotoBottom()
 }
 
 func (a *App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		a.viewport.Width = msg.Width
+		a.viewport.Height = msg.Height - 6
+		a.textarea.SetWidth(msg.Width)
+		a.refreshViewport()
+
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c":
-			return a, tea.Quit
-		}
-		
-		if msg.String() == "ctrl+k" {
-			a.previousState = a.state
-			a.state = "palette"
-			return a, a.paletteView.Init()
-		}
-		
-		if msg.String() == "ctrl+t" {
-			styles.CycleTheme()
-			// Forces re-render across the app with new styles
-			return a, nil
-		}
-
-		if a.state == "palette" {
-			var cmd tea.Cmd
-			tempView, cmd := a.paletteView.Update(msg)
-			if tempView != nil {
-				a.paletteView = tempView
+			if a.isStreaming && a.cancel != nil {
+				a.cancel()
+				a.isStreaming = false
+			} else {
+				return a, tea.Quit
 			}
-			
-			if a.paletteView.Action != "" {
-				action := a.paletteView.Action
-				a.paletteView.Action = ""
+		case "ctrl+t":
+			a.cfg.Theme = NextTheme(a.cfg.Theme)
+			a.styles = GenerateStyles(a.cfg.Theme)
+			a.cfg.Save()
+			a.refreshViewport()
+		case "ctrl+l":
+			if a.cfg.Language == "ru" {
+				a.cfg.Language = "en"
+			} else {
+				a.cfg.Language = "ru"
+			}
+			a.cfg.Save()
+			a.refreshViewport()
+		case "ctrl+o":
+			if a.cfg.ActiveProvider == "openai" {
+				a.cfg.ActiveProvider = "openrouter"
+			} else {
+				a.cfg.ActiveProvider = "openai"
+			}
+			a.cfg.Save()
+			a.refreshViewport()
+		case "enter":
+			if !a.isStreaming && strings.TrimSpace(a.textarea.Value()) != "" {
+				text := a.textarea.Value()
+				a.textarea.Reset()
 				
-				switch action {
-				case "theme":
-					styles.CycleTheme()
-					a.state = a.previousState
-				case "esc":
-					a.state = a.previousState
-				case "quit":
-					return a, tea.Quit
-				case "providers":
-					a.state = "providers"
-				case "checker":
-					a.state = "checker"
-				case "compare":
-					a.state = "compare"
-				}
+				a.history = append(a.history, api.Message{Role: "user", Content: text})
+				a.current = []string{}
+				a.isStreaming = true
+				
+				a.refreshViewport()
+
+				var ctx context.Context
+				ctx, a.cancel = context.WithCancel(context.Background())
+				ch := make(chan api.StreamChunk)
+				
+				go api.StreamChat(ctx, a.cfg.GetActive(), a.history, ch)
+				cmds = append(cmds, listenStream(ch))
 			}
-			return a, cmd
 		}
 
-		if a.state == "providers" {
-			if msg.String() == "enter" {
-				p := a.providersView.GetSelected()
-				a.chatView = views.NewChatView(p, a.keyStore)
-				a.state = "chat"
-				return a, a.chatView.Init()
-			}
-			if msg.String() == "c" {
-				a.state = "checker"
-				return a, a.checkerView.Init()
-			}
-		} else if a.state == "chat" {
-			if msg.String() == "esc" {
-				if !a.chatView.IsStreaming() {
-					a.state = "providers"
-					return a, nil
-				}
-			}
-		} else if a.state == "checker" {
-			if msg.String() == "c" || msg.String() == "esc" {
-				a.state = "providers"
-				return a, nil
-			}
-		} else if a.state == "compare" {
-			if msg.String() == "esc" {
-				a.state = "providers"
-				return a, nil
-			}
+	case StreamChunkMsg:
+		if msg.Chunk.Error != nil {
+			a.current = append(a.current, "\n**Ошибка:** "+msg.Chunk.Error.Error())
+			a.isStreaming = false
+		} else if msg.Chunk.Done {
+			a.history = append(a.history, api.Message{Role: "assistant", Content: strings.Join(a.current, "")})
+			a.current = []string{}
+			a.isStreaming = false
+		} else {
+			a.current = append(a.current, msg.Chunk.Content)
+			cmds = append(cmds, listenStream(msg.ch))
 		}
+		a.refreshViewport()
 	}
 
-	if a.state == "providers" {
-		var cmd tea.Cmd
-		a.providersView, cmd = a.providersView.Update(msg)
-		cmds = append(cmds, cmd)
-	} else if a.state == "chat" {
-		var cmd tea.Cmd
-		tempModel, cmd := a.chatView.Update(msg)
-		if tempModel != nil {
-			a.chatView = tempModel
-		}
-		cmds = append(cmds, cmd)
-	} else if a.state == "checker" {
-		var cmd tea.Cmd
-		tempModel, cmd := a.checkerView.Update(msg)
-		if tempModel != nil {
-			a.checkerView = tempModel
-		}
-		cmds = append(cmds, cmd)
-	} else if a.state == "compare" {
-		var cmd tea.Cmd
-		tempModel, cmd := a.compareView.Update(msg)
-		if tempModel != nil {
-			a.compareView = tempModel
-		}
-		cmds = append(cmds, cmd)
-	}
+	var cmd tea.Cmd
+	a.textarea, cmd = a.textarea.Update(msg)
+	cmds = append(cmds, cmd)
+
+	a.viewport, cmd = a.viewport.Update(msg)
+	cmds = append(cmds, cmd)
 
 	return a, tea.Batch(cmds...)
 }
 
 func (a *App) View() string {
-	if a.state == "palette" && a.paletteView != nil {
-		return a.paletteView.View()
-	}
-	if a.state == "providers" {
-		return a.providersView.View() + "\n[c] Менеджер ключей | [Ctrl+K] Палитра\n"
-	}
-	if a.state == "chat" && a.chatView != nil {
-		return a.chatView.View()
-	}
-	if a.state == "checker" && a.checkerView != nil {
-		return a.checkerView.View()
-	}
-	if a.state == "compare" && a.compareView != nil {
-		return a.compareView.View()
-	}
-	return "Загрузка..."
-}
+	provider := a.cfg.GetActive()
+	
+	headerText := fmt.Sprintf(" VeFier CLI | Провайдер: %s | Язык: %s | Тема: %s ",
+		provider.Name, a.cfg.Language, a.cfg.Theme)
+		
+	header := a.styles["title"].Render(headerText)
 
+	helpStr := "Enter: Отправить | Ctrl+C: Отмена/Выход | Ctrl+T: Тема | Ctrl+L: Язык | Ctrl+O: Провайдер"
+	if a.cfg.Language == "en" {
+		helpStr = "Enter: Send | Ctrl+C: Cancel/Quit | Ctrl+T: Theme | Ctrl+L: Language | Ctrl+O: Provider"
+	}
+	help := a.styles["help"].Render(helpStr)
+
+	return fmt.Sprintf("%s\n\n%s\n%s\n%s", header, a.viewport.View(), a.textarea.View(), help)
+}
