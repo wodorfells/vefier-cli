@@ -88,3 +88,4 @@ func (v *CompareView) View() string {
 	
 	return header + "\n\n" + layout + "\n\n" + styles.ListNormal.Render(footer)
 }
+

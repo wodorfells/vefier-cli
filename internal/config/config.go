@@ -19,3 +19,4 @@ func LoadConfig() *Config {
         ConfigFilePath: filepath.Join(home, ".vefier_config.json"),
 	}
 }
+

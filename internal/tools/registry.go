@@ -70,3 +70,4 @@ func (r *Registry) ToggleMode() {
 		r.Mode = ModeAskAll
 	}
 }
+

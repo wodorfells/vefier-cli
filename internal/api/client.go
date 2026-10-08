@@ -93,3 +93,4 @@ func StreamCompletion(ctx context.Context, p providers.Provider, token string, m
 	}
 	ch <- StreamChunk{Done: true}
 }
+

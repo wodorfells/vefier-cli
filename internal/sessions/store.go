@@ -73,3 +73,4 @@ func (s *Store) Save(id string) {
 	data, _ := json.Marshal(sess)
 	os.WriteFile(filepath.Join(s.storage, id+".json"), data, 0644)
 }
+

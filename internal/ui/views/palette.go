@@ -66,3 +66,4 @@ func (v *PaletteView) Update(msg tea.Msg) (*PaletteView, tea.Cmd) {
 func (v *PaletteView) View() string {
 	return "\n  " + v.Model.View()
 }
+

@@ -190,3 +190,4 @@ func (v *ChatView) View() string {
 
 	return b.String()
 }
+

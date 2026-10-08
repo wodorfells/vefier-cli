@@ -1,7 +1,4 @@
 package styles
-
-import 
-
 type Palette struct {
 	Name   string
 	GradA  string
@@ -35,3 +32,4 @@ func CycleTheme() string {
 func GetCurrentPalette() Palette {
 	return Themes[currentThemeIdx]
 }
+

@@ -33,3 +33,4 @@ func CheckKey(ctx context.Context, p providers.Provider, k keys.Key) string {
 	// Если провайдер просто не существует локально или заглушен
 	return "active"
 }
+

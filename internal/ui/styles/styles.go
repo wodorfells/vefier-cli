@@ -55,3 +55,4 @@ func ApplyTheme(name string) {
 		Padding(0, 2).
 		MarginBottom(1)
 }
+

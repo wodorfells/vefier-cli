@@ -77,3 +77,4 @@ func (v *ProvidersView) View() string {
 func (v *ProvidersView) GetSelected() providers.Provider {
     return v.providers[v.cursor]
 }
+

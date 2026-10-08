@@ -55,3 +55,4 @@ func (s *Store) MarkFailed(id string, reason string) {
 		}
 	}
 }
+

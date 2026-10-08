@@ -17,3 +17,4 @@ func GetCatalog() []Provider {
         {ID: "tako", Name: "Tako", BaseURL: "https://tako.com/api/v3", AuthType: "X-API-Key"},
 	}
 }
+

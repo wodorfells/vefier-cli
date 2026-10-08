@@ -136,3 +136,4 @@ func (v *CheckerView) View() string {
 	b.WriteString(styles.ListNormal.Render("[r] Проверить все  [i] Демо-импорт  [c] Каталог  [q] Выход"))
 	return b.String()
 }
+
