@@ -5,8 +5,8 @@ import (
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"vefier-cli/config" // Если имя модуля в go.mod другое, укажите ваше (например: "github.com/wodorfells/vefier-cli/config")
-	"vefier-cli/ui"     // Аналогично укажите правильный путь к пакету ui
+	"vefier-cli/internal/config"
+	"vefier-cli/internal/ui"
 )
 
 func main() {
