@@ -1,3 +1,5 @@
+не доделаный опенсурс CLI написанный claude. используйте с пониманием этого
+
 # VeFier CLI 🚀
 
 ![demo](https://raw.githubusercontent.com/vefier/vefier-cli/main/assets/demo.gif)
